@@ -16,6 +16,9 @@ export class Config implements IConfig {
 	public readonly logLevel: LogLevel;
 	public readonly logRequests: boolean;
 
+	//Security environments
+	readonly corsOrigins: string[];
+
 	constructor() {
 		try {
 			// ========================================
@@ -31,6 +34,13 @@ export class Config implements IConfig {
 
 			this.logLevel = logLevel;
 			this.logRequests = logRequest;
+
+			// ========================================
+			// Security environments
+			// ========================================
+			this.corsOrigins = this.normalizeUrls(
+				env.get('CORS_ORIGINS').default('http://localhost:5173,http://localhost:4003,http://localhost:4000').asArray(',')
+			);
 		} catch (error) {
 			throw new ConfigError(`Failed to validate environment variables ${getErrMessage(error)}}`, this.generateContext());
 		}

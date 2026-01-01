@@ -45,6 +45,9 @@ export interface IConfig extends HealthCheckable {
 	readonly logLevel: LogLevel;
 	readonly logRequests: boolean;
 
+	//Security
+	readonly corsOrigins: string[];
+
 	//Functions.
 	isDevelopment(): boolean;
 	isProduction(): boolean;

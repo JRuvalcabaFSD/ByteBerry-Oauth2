@@ -255,7 +255,7 @@ export class HealthService implements Interfaces.IHealthService {
 			if (!dependencies[service]) {
 				dependencies[service] = {
 					status: 'unhealthy',
-					message: `Critical service ${service} is not registered in the container`,
+					message: `Critical service ${service} is failed`,
 					responseTime: 0,
 				};
 			}

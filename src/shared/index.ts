@@ -5,8 +5,8 @@ export * from './decorators/logger.decorators.js';
 
 // Errors
 export * from './errors/core.errors.js';
-export * from './errors/container.errors.js';
 export * from './errors/handler.errors.js';
+export * from './errors/http.errors.js';
 
 // Helpers
 export * from './helpers/functions.js';

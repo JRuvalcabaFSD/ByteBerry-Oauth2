@@ -7,7 +7,7 @@
 import '@config';
 // import '@bootstrap';
 import '@infrastructure';
-// import '@presentation';
+import '@presentation';
 
 import { AppError } from '@domain';
 import { Container } from './container.js';
@@ -26,7 +26,7 @@ import { autoRegister, ContainerCreationError } from '@shared';
  * // Accessing critical services during bootstrap
  * criticalServices.forEach(token => container.resolve(token));
  */
-export const criticalServices: Token[] = ['Clock', 'Config', 'HealthService', 'Logger', 'Uuid'];
+export const criticalServices: Token[] = ['Clock', 'Config', 'Logger', 'Uuid', 'HttpServer'];
 
 /**
  * Initializes and configures the application's dependency injection container.

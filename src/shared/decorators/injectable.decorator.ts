@@ -1,37 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { HealthRegistry } from '@infrastructure';
-import { HealthCheckable, IContainer, Lifecycle, Token } from '@interfaces';
 import { ServiceMap } from '@ServiceMap';
 import { InjectableError } from '@shared';
+import { Constructor, injectableRegistry } from './registry.js';
+import { HealthCheckable, IContainer, Lifecycle, Token } from '@interfaces';
+import { HealthRegistry } from 'src/infrastructure/services/health-register.service.js';
 
 /**
- * Represents a type that can be instantiated with the `new` keyword.
+ * Describes the properties required to mark a class or value as injectable within a dependency injection system.
  *
- * @template T - The type of the instance created by the constructor.
+ * @property name - The unique token used to identify the injectable.
+ * @property lifecycle - (Optional) The lifecycle management strategy for the injectable (e.g., singleton, transient).
+ * @property depends - (Optional) An array of tokens representing dependencies required by the injectable.
  */
-
-type Constructor<T = unknown> = new (...args: any[]) => T;
-
-/**
- * A registry that maps service tokens to their corresponding constructor, lifecycle, and dependencies.
- *
- * - The key is a token from the `ServiceMap` representing a service.
- * - The value is an object containing:
- *   - `ctor`: The constructor function for the service.
- *   - `lifecycle`: Specifies whether the service is a 'singleton' or 'transient'.
- *   - `dependencyTokens`: An array of tokens representing the dependencies required by the service.
- *
- * This registry is used to manage service instantiation and dependency injection.
- */
-
-export const injectableRegistry = new Map<
-	keyof ServiceMap,
-	{
-		ctor: Constructor;
-		lifecycle: 'singleton' | 'transient';
-		dependencyTokens: (keyof ServiceMap)[];
-	}
->();
 
 interface InjectableProps {
 	name: Token;
@@ -85,7 +65,7 @@ function registerService<K extends keyof ServiceMap>(
 
 		// AUTO-REGISTRO DE SALUD:
 		// Si la instancia tiene el método checkHealth, la suscribimos al registry automáticamente
-		if (instance && typeof (instance as any).checkHealth === 'function') {
+		if (instance && typeof (instance as any).checkHealth === 'function' && token !== 'HealthService') {
 			healthRegistry.register(token, instance as unknown as HealthCheckable);
 		}
 

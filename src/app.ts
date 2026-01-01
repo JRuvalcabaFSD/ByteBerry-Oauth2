@@ -15,6 +15,8 @@ async function main() {
 	const container = bootstrapContainer();
 
 	const logger = container.resolve('Logger');
+	const server = container.resolve('HttpServer');
+	await server.start();
 	const { port, serviceUrl } = container.resolve('Config');
 
 	logger.info(`service available in the url: ${serviceUrl}:${port}`);
