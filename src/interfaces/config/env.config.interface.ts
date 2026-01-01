@@ -40,6 +40,8 @@ export interface IConfig {
 	readonly version: string;
 	readonly serviceName: string;
 	readonly serviceUrl: string;
+	readonly logLevel: LogLevel;
+	readonly logRequests: boolean;
 
 	//Functions.
 	isDevelopment(): boolean;

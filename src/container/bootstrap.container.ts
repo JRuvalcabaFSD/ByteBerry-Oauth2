@@ -6,7 +6,7 @@
 // import '@application';
 import '@config';
 // import '@bootstrap';
-// import '@infrastructure';
+import '@infrastructure';
 // import '@presentation';
 
 import { AppError } from '@domain';

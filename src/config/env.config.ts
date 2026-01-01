@@ -1,9 +1,8 @@
 import env from 'env-var';
 import pkg from '../../package.json' with { type: 'json' };
 
-import { IConfig, NodeEnv } from '@interfaces';
-import { ConfigError, getErrMessage } from '@shared';
-import { Injectable } from 'src/shared/decorators/injectable.decorator.js';
+import { IConfig, LogLevel, NodeEnv } from '@interfaces';
+import { ConfigError, getErrMessage, Injectable } from '@shared';
 
 //TODO documentar
 @Injectable({ name: 'Config' })
@@ -14,6 +13,8 @@ export class Config implements IConfig {
 	public readonly version: string;
 	public readonly serviceName: string;
 	public readonly serviceUrl: string;
+	public readonly logLevel: LogLevel;
+	public readonly logRequests: boolean;
 
 	constructor() {
 		try {
@@ -25,6 +26,11 @@ export class Config implements IConfig {
 			this.version = pkg.version ?? '0.0.0';
 			this.serviceName = env.get('SERVICE_NAME').default('ByteBerry-OAuth2').asString();
 			this.serviceUrl = this.normalizeUrls(env.get('SERVICE_URL').default('http://localhost').asUrlString());
+
+			const { logLevel, logRequest } = this.getLoggerEnvs();
+
+			this.logLevel = logLevel;
+			this.logRequests = logRequest;
 		} catch (error) {
 			throw new ConfigError(`Failed to validate environment variables ${getErrMessage(error)}}`, this.generateContext());
 		}
@@ -157,5 +163,29 @@ export class Config implements IConfig {
 			acc.push(normalizeSingleUrl(url));
 			return acc;
 		}, []) as T;
+	}
+
+	/**
+	 * Retrieves logger-related environment configurations.
+	 *
+	 * This method enforces production safety by throwing a `ConfigError` if:
+	 * - The application is running in production and the log level is set to "debug".
+	 * - The application is running in production and request logging is enabled.
+	 *
+	 * @returns An object containing:
+	 * - `logLevel`: The log level, which can be "debug", "info", "warn", or "error".
+	 * - `logRequest`: A boolean indicating whether request logging is enabled.
+	 *
+	 * @throws {ConfigError} If invalid logger settings are detected in production.
+	 */
+
+	private getLoggerEnvs(): { logLevel: LogLevel; logRequest: boolean } {
+		if (this.isProduction() && process.env.LOG_LEVEL === 'debug') throw new ConfigError('cannot assign logLevel as "debug" in production');
+		if (this.isProduction() && process.env.LOG_REQUESTS === 'true') throw new ConfigError('cannot show the request logs in production');
+
+		return {
+			logLevel: env.get('LOG_LEVEL').default('info').asEnum(['debug', 'info', 'warn', 'error']),
+			logRequest: env.get('LOG_REQUESTS').default('true').asBoolStrict(),
+		};
 	}
 }

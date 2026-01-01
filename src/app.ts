@@ -1,7 +1,7 @@
-/* eslint-disable no-console */
 import dotenv from 'dotenv';
-import { bootstrapContainer } from './container/bootstrap.container.js';
-import { handledServicesError } from './shared/errors/handler.errors.js';
+
+import { handledServicesError } from '@shared';
+import { bootstrapContainer } from '@container';
 
 (() => {
 	main().catch((error) => {
@@ -14,7 +14,8 @@ async function main() {
 	dotenv.config({ override: false });
 	const container = bootstrapContainer();
 
-	const config = container.resolve('Config');
+	const logger = container.resolve('Logger');
+	const { port, serviceUrl } = container.resolve('Config');
 
-	console.log({ config });
+	logger.info(`service available in the url: ${serviceUrl}:${port}`);
 }
