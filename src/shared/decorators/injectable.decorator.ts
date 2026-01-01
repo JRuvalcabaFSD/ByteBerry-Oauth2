@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IContainer, Lifecycle, Token } from '@interfaces';
+import { HealthRegistry } from '@infrastructure';
+import { HealthCheckable, IContainer, Lifecycle, Token } from '@interfaces';
 import { ServiceMap } from '@ServiceMap';
 import { InjectableError } from '@shared';
 
@@ -75,11 +76,20 @@ export function Injectable(props: InjectableProps) {
 function registerService<K extends keyof ServiceMap>(
 	container: IContainer,
 	token: K,
-	metadata: typeof injectableRegistry extends Map<any, infer R> ? R : any
+	metadata: typeof injectableRegistry extends Map<any, infer R> ? R : any,
+	healthRegistry: HealthRegistry
 ) {
 	const factory = (c: IContainer): ServiceMap[K] => {
-		const instances = metadata.dependencyTokens.map((depToken) => c.resolve(depToken as keyof ServiceMap));
-		return new metadata.ctor(...instances) as ServiceMap[K];
+		const instances = metadata.dependencyTokens.map((depToken: any) => c.resolve(depToken as keyof ServiceMap));
+		const instance = new metadata.ctor(...instances) as ServiceMap[K];
+
+		// AUTO-REGISTRO DE SALUD:
+		// Si la instancia tiene el método checkHealth, la suscribimos al registry automáticamente
+		if (instance && typeof (instance as any).checkHealth === 'function') {
+			healthRegistry.register(token, instance as unknown as HealthCheckable);
+		}
+
+		return instance;
 	};
 
 	if (metadata.lifecycle === 'singleton') {
@@ -101,10 +111,12 @@ function registerService<K extends keyof ServiceMap>(
  */
 
 export function autoRegister(container: IContainer) {
+	const healthRegistry = new HealthRegistry();
+	container.registerInstance('HealthRegistry' as any, healthRegistry);
 	for (const [token, metadata] of injectableRegistry) {
 		for (const dep of metadata.dependencyTokens) {
 			if (!injectableRegistry.has(dep) && !container.isRegistered(dep)) throw new InjectableError(token, dep);
 		}
-		registerService(container, token as keyof ServiceMap, metadata);
+		registerService(container, token as keyof ServiceMap, metadata, healthRegistry);
 	}
 }

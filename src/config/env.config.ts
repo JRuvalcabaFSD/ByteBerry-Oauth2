@@ -188,4 +188,18 @@ export class Config implements IConfig {
 			logRequest: env.get('LOG_REQUESTS').default('true').asBoolStrict(),
 		};
 	}
+
+	/**
+	 * Checks the health status of the configuration service.
+	 *
+	 * @returns A promise that resolves to an object indicating the health status (`'healthy'` or `'unhealthy'`)
+	 *          and an optional message describing the current environment.
+	 */
+
+	public async checkHealth(): Promise<{ status: 'healthy' | 'unhealthy'; message?: string }> {
+		return {
+			status: 'healthy',
+			message: `Config operational (Env: ${this.nodeEnv})`,
+		};
+	}
 }

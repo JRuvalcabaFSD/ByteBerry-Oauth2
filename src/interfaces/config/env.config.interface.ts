@@ -1,3 +1,5 @@
+import { HealthCheckable } from '../services/health.service.interface.js';
+
 /**
  * Extends the global ServiceMap interface to include the IConfig interface.
  * This allows for type-safe access to configuration settings throughout the application.
@@ -33,7 +35,7 @@ export type NodeEnv = 'development' | 'production' | 'test';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 //TODO documentar
-export interface IConfig {
+export interface IConfig extends HealthCheckable {
 	// Core environments
 	readonly nodeEnv: NodeEnv;
 	readonly port: number;

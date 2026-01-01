@@ -64,4 +64,18 @@ export class ClockService implements IClock {
 	public isoString(): string {
 		return new Date().toISOString();
 	}
+
+	/**
+	 * Checks the health status of the IClock service.
+	 *
+	 * @returns A promise that resolves to an object indicating the health status (`'healthy'` or `'unhealthy'`)
+	 *          and an optional message describing the service state.
+	 */
+
+	public async checkHealth(): Promise<{ status: 'healthy' | 'unhealthy'; message?: string }> {
+		return {
+			status: 'healthy',
+			message: 'Clock service is available and operational',
+		};
+	}
 }

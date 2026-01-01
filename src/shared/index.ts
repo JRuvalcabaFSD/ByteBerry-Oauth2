@@ -1,5 +1,7 @@
 //Decorators
+export * from './decorators/container.proxy.js';
 export * from './decorators/injectable.decorator.js';
+export * from './decorators/logger.decorators.js';
 
 // Errors
 export * from './errors/core.errors.js';

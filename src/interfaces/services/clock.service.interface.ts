@@ -1,3 +1,5 @@
+import { HealthCheckable } from './health.service.interface.js';
+
 /**
  * Extends the global ServiceMap interface to include the IConfig interface.
  * This allows for type-safe access to configuration settings throughout the application.
@@ -43,7 +45,7 @@ declare module '@ServiceMap' {
  * ```
  */
 
-export interface IClock {
+export interface IClock extends HealthCheckable {
 	now(): Date;
 	timestamp(): number;
 	isoString(): string;

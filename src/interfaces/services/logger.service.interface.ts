@@ -1,11 +1,11 @@
+import { HealthCheckable, LogLevel } from '@interfaces';
+
 /**
  * Extends the global ServiceMap interface to include the IConfig interface.
  * This allows for type-safe access to configuration settings throughout the application.
  * @module @ServiceMap
  * @interface ServiceMap
  */
-
-import { LogLevel } from '@interfaces';
 
 declare module '@ServiceMap' {
 	interface ServiceMap {
@@ -88,7 +88,7 @@ export interface ILogEntry {
  * ```
  */
 
-export interface ILogger {
+export interface ILogger extends HealthCheckable {
 	info(msg: string, context?: Record<string, unknown>): void;
 	error(msg: string, context?: Record<string, unknown>): void;
 	warn(msg: string, context?: Record<string, unknown>): void;
