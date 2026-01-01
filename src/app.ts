@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
 import dotenv from 'dotenv';
-import { getErrMessage } from '@shared';
 import { bootstrapContainer } from './container/bootstrap.container.js';
+import { handledServicesError } from './shared/errors/handler.errors.js';
 
 (() => {
 	main().catch((error) => {
-		console.error(getErrMessage(error));
+		handledServicesError(error);
 		process.exit(1);
 	});
 })();
