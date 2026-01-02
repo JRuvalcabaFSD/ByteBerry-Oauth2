@@ -15,6 +15,7 @@ export class Config implements IConfig {
 	public readonly serviceUrl: string;
 	public readonly logLevel: LogLevel;
 	public readonly logRequests: boolean;
+	public readonly autoCleanupIntervalMs: number;
 
 	//Security environments
 	readonly corsOrigins: string[];
@@ -29,6 +30,7 @@ export class Config implements IConfig {
 			this.version = pkg.version ?? '0.0.0';
 			this.serviceName = env.get('SERVICE_NAME').default('ByteBerry-OAuth2').asString();
 			this.serviceUrl = this.normalizeUrls(env.get('SERVICE_URL').default('http://localhost').asUrlString());
+			this.autoCleanupIntervalMs = env.get('AUTO_CLEANUP_INTERVAL_MS').default('300000').asIntPositive();
 
 			const { logLevel, logRequest } = this.getLoggerEnvs();
 
