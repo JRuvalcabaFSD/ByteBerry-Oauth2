@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 
-import { handledServicesError } from '@shared';
-import { bootstrapContainer } from '@container';
+import { handledServicesError, withLoggerContext } from '@shared';
+import { bootstrap } from '@bootstrap';
 
 (() => {
 	main().catch((error) => {
@@ -12,12 +12,10 @@ import { bootstrapContainer } from '@container';
 
 async function main() {
 	dotenv.config({ override: false });
-	const container = bootstrapContainer();
+	const { container } = await bootstrap();
 
-	const logger = container.resolve('Logger');
-	const server = container.resolve('HttpServer');
-	await server.start();
+	const ctxLogger = withLoggerContext(container.resolve('Logger'), 'main');
 	const { port, serviceUrl } = container.resolve('Config');
 
-	logger.info(`service available in the url: ${serviceUrl}:${port}`);
+	ctxLogger.info(`service available in the url: ${serviceUrl}:${port}`);
 }

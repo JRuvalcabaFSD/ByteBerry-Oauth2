@@ -157,11 +157,50 @@ export class CircularDependencyError extends ContainerError {
 	}
 }
 
+/**
+ * Represents an error thrown when a dependency required by an injectable class is not registered in the container.
+ *
+ * @extends ContainerError
+ *
+ * @param token - The token representing the injectable class.
+ * @param dep - The name of the missing dependency.
+ *
+ * @remarks
+ * This error is typically thrown during the self-registration process of a class when one of its dependencies
+ * cannot be resolved because it is not registered in the dependency injection container.
+ */
+
 export class InjectableError extends ContainerError {
 	constructor(token: Token, dep: string) {
 		super(`Self Registration Error: The class '${token}' depends on '${String(dep)}', but this is not registered.`, token);
 		this.name = 'InjectableError';
 
 		Error.captureStackTrace(this, InjectableError);
+	}
+}
+
+/**
+ * Represents an error that occurs during the bootstrap process of the application.
+ * Extends the {@link AppError} class and allows for additional contextual information.
+ *
+ * @example
+ * ```typescript
+ * throw new BootstrapError('Failed to initialize database', { dbHost: 'localhost' });
+ * ```
+ *
+ * @extends AppError
+ * @property {Record<string, unknown> | undefined} context - Optional contextual information about the error.
+ */
+
+export class BootstrapError extends AppError {
+	public readonly context?: Record<string, unknown>;
+	constructor(msg: string, context?: Record<string, unknown>) {
+		super(msg, 'bootstrap');
+		this.name = 'BootstrapError';
+		this.context = context ?? undefined;
+
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this, BootstrapError);
+		}
 	}
 }
