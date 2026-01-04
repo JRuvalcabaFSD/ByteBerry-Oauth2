@@ -5,5 +5,6 @@ import { LoginController } from '../controller/login.controller.js';
 export function createAuthRoutes(loginCtl: LoginController): Router {
 	const router = Router();
 	router.get('/login', loginCtl.getLoginForm);
+	router.post('/login', loginCtl.login);
 	return router;
 }

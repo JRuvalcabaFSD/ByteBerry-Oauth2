@@ -101,7 +101,7 @@ export class AppRouter {
 			{ name: 'health', value: `${baseUrl}/health`, method: 'GET' },
 			// { name: 'authorize', value: `${baseUrl}/auth/authorize`, method: 'GET' },
 			// { name: 'JWKS', value: `${baseUrl}/auth/.well-known/jwks.json`, method: 'GET' },
-			// { name: 'login', value: `${baseUrl}/auth/login`, method: 'POST' },
+			{ name: 'login', value: `${baseUrl}/auth/login`, method: 'POST' },
 			{ name: 'login', value: `${baseUrl}/auth/login`, method: 'GET' },
 			// { name: 'token', value: `${baseUrl}/auth/token`, method: 'POST' },
 			// { name: 'user', value: `${baseUrl}/user/register`, method: 'POST' },

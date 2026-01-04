@@ -55,24 +55,25 @@ export class InMemoryUserRepository implements Partial<IUserRepository> {
 		return UserEntity.create({ ...user });
 	}
 
-	// public async findByUserName(username: string): Promise<UserEntity | undefined> {
-	// 	const normalizeUsername = username.toLowerCase().trim();
-	// 	return MOCK_USERS.find((user) => user.username === normalizeUsername);
-	// }
+	public async findByUserName(username: string): Promise<UserEntity | null> {
+		const normalizeUsername = username.toLowerCase().trim();
+		const user = MOCK_USERS.find((user) => user.username === normalizeUsername);
+
+		if (!user) return null;
+
+		return user;
+	}
 	// public async findById(id: string): Promise<UserEntity | undefined> {
 	// 	return MOCK_USERS.find((user) => user.id === id);
 	// }
-	// public async validateCredentials(emailOrUsername: string, password: string): Promise<UserEntity | undefined> {
-	// 	const user = (await this.findByEmail(emailOrUsername)) ?? ((await this.findByUserName(emailOrUsername)) as UserEntity);
+	public async validateCredentials(emailOrUsername: string, password: string): Promise<UserEntity | null> {
+		const user = (await this.findByEmail(emailOrUsername)) ?? ((await this.findByUserName(emailOrUsername)) as UserEntity);
 
-	// 	if (!user) {
-	// 		return undefined;
-	// 	}
+		if (!user) return null;
 
-	// 	if (!user.validatePassword(password)) {
-	// 		return undefined;
-	// 	}
+		// TODO F2 change validation password
+		if (user.passwordHash !== password) return null;
 
-	// 	return user;
-	// }
+		return user;
+	}
 }

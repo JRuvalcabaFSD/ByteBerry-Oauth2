@@ -2,7 +2,7 @@ import { Injectable } from '@shared';
 import { SessionEntity } from '@domain';
 import type { IConfig, ISessionRepository } from '@interfaces';
 
-@Injectable({ name: 'SessionRepository' })
+@Injectable({ name: 'SessionRepository', depends: ['Config'] })
 export class InMemorySessionRepository implements ISessionRepository {
 	private readonly sessions = new Map<string, SessionEntity>();
 	private readonly userSessionsIndex = new Map<string, Set<string>>();
