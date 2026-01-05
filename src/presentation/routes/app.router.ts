@@ -1,9 +1,15 @@
 import { Router, Request, Response } from 'express';
 
 import { Injectable } from '@shared';
-import { createHealthRoutes } from './health.routes.js';
-import type { HomeResponse, IClock, IConfig, IHealthService } from '@interfaces';
-import { createAuthRoutes, type LoginController } from '@presentation';
+import type { HomeResponse, IClock, IConfig, IHealthService, ILogger, ISessionRepository } from '@interfaces';
+import {
+	AuthController,
+	createAuthRoutes,
+	createHealthRoutes,
+	createSessionMiddleware,
+	RedirectToLoginErrorHandle,
+	type LoginController,
+} from '@presentation';
 
 /**
  * Extends the global ServiceMap interface to include the IConfig interface.
@@ -19,15 +25,21 @@ declare module '@ServiceMap' {
 }
 
 //TODO documentar
-@Injectable({ name: 'AppRouter', depends: ['Config', 'Clock', 'HealthService', 'LoginController'] })
+@Injectable({
+	name: 'AppRouter',
+	depends: ['Config', 'Clock', 'SessionRepository', 'Logger', 'HealthService', 'LoginController', 'AuthController'],
+})
 export class AppRouter {
 	private readonly router: Router;
 
 	constructor(
 		private readonly config: IConfig,
 		private readonly clock: IClock,
+		private readonly sessionRepository: ISessionRepository,
+		private readonly logger: ILogger,
 		private readonly heathService: IHealthService,
-		private readonly LoginController: LoginController
+		private readonly LoginController: LoginController,
+		private readonly AuthController: AuthController
 	) {
 		this.router = Router();
 		this.setupRoutes();
@@ -55,8 +67,14 @@ export class AppRouter {
 	private setupRoutes(): void {
 		const baseurl = `${this.config.serviceUrl}:${this.config.port}`;
 
+		// TODO RequireSession
+		// const requireSession = createSessionMiddleware(this.sessionRepository, this.logger, { onError: new UnAuthorizedErrorHandle() });
+		const requireSessionRedirect = createSessionMiddleware(this.sessionRepository, this.logger, {
+			onError: new RedirectToLoginErrorHandle(),
+		});
+
 		//Auth
-		this.router.use('/auth', createAuthRoutes(this.LoginController));
+		this.router.use('/auth', createAuthRoutes(this.LoginController, this.AuthController, requireSessionRedirect));
 
 		//Health
 		this.router.use('/health', createHealthRoutes(this.heathService));
@@ -99,7 +117,7 @@ export class AppRouter {
 			{ name: 'home', value: `${baseUrl}/`, method: 'GET' },
 			{ name: 'deepHealth', value: `${baseUrl}/health/deep`, method: 'GET' },
 			{ name: 'health', value: `${baseUrl}/health`, method: 'GET' },
-			// { name: 'authorize', value: `${baseUrl}/auth/authorize`, method: 'GET' },
+			{ name: 'authorize', value: `${baseUrl}/auth/authorize`, method: 'GET' },
 			// { name: 'JWKS', value: `${baseUrl}/auth/.well-known/jwks.json`, method: 'GET' },
 			{ name: 'login', value: `${baseUrl}/auth/login`, method: 'POST' },
 			{ name: 'login', value: `${baseUrl}/auth/login`, method: 'GET' },

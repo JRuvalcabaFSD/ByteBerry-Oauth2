@@ -45,6 +45,7 @@ export interface IConfig extends HealthCheckable {
 	readonly logLevel: LogLevel;
 	readonly logRequests: boolean;
 	readonly autoCleanupIntervalMs: number;
+	readonly oauth2AuthCodeExpiresIn: number;
 
 	//Security
 	readonly corsOrigins: string[];

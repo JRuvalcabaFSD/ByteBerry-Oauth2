@@ -1,4 +1,4 @@
-import { LoginRequestDTO, LoginResponseDTO } from '@application';
+import { CodeRequestDTO, CodeResponseDTO, LoginRequestDTO, LoginResponseDTO } from '@application';
 
 /**
  * Extends the global ServiceMap interface to include the IConfig interface.
@@ -10,6 +10,7 @@ import { LoginRequestDTO, LoginResponseDTO } from '@application';
 declare module '@ServiceMap' {
 	interface ServiceMap {
 		LoginUseCase: ILoginUseCase;
+		GenerateCodeUseCase: IGenerateAuthCodeUseCase;
 	}
 }
 
@@ -28,4 +29,19 @@ declare module '@ServiceMap' {
  */
 export interface ILoginUseCase {
 	execute(request: LoginRequestDTO): Promise<LoginResponseDTO>;
+}
+
+/**
+ * Use case interface for generating OAuth 2.0 authorization codes.
+ *
+ * @remarks
+ * This interface defines the contract for generating authorization codes in the OAuth 2.0 flow.
+ * The authorization code is typically generated during the authorization step and later exchanged
+ * for access tokens.
+ *
+ * @interface IGenerateAuthCodeUseCase
+ */
+
+export interface IGenerateAuthCodeUseCase {
+	execute(userId: string, request: CodeRequestDTO): Promise<CodeResponseDTO>;
 }

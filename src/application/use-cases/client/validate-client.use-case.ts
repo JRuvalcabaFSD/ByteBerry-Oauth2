@@ -61,7 +61,7 @@ export class ValidateClientUseCase implements IValidateClientUseCase {
 		this.logger.debug('Validating OAuth client', { clientId: data.clientId });
 
 		try {
-			//We look for if the client is registered
+			// look for if the client is registered
 			const client = await this.repository.findByClientId(data.clientId);
 
 			if (!client) {
@@ -69,7 +69,7 @@ export class ValidateClientUseCase implements IValidateClientUseCase {
 				throw new InvalidClientError('Invalid client');
 			}
 
-			//We validate the redirection url and the grand type.
+			// validate the redirection url and the grand type.
 			if (!client.isValidRedirectUri(data.redirectUri)) {
 				this.logger.warn('Invalid redirect URI', { clientId: data.clientId, redirectUri: data.redirectUri });
 				throw new InvalidClientError('Invalid redirect URI');

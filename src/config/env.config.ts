@@ -17,6 +17,9 @@ export class Config implements IConfig {
 	public readonly logRequests: boolean;
 	public readonly autoCleanupIntervalMs: number;
 
+	//OAuth2 environments
+	public readonly oauth2AuthCodeExpiresIn: number;
+
 	//Security environments
 	readonly corsOrigins: string[];
 
@@ -37,6 +40,10 @@ export class Config implements IConfig {
 			this.logLevel = logLevel;
 			this.logRequests = logRequest;
 
+			// ========================================
+			// OAuth2 environments
+			// ========================================
+			this.oauth2AuthCodeExpiresIn = env.get('OAUTH2_AUTH_CODE_EXPIRES_IN').default('1').asIntPositive();
 			// ========================================
 			// Security environments
 			// ========================================

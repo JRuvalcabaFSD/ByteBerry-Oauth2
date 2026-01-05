@@ -46,7 +46,7 @@ interface CodeParams extends Omit<CodeData, 'expiresAt'> {
  *
  * @remarks
  * - The authorization code can only be used once and has a limited lifetime.
- * - Use {@link AuthCodeEntity.create} to instantiate a new authorization code.
+ * - Use {@link CodeEntity.create} to instantiate a new authorization code.
  *
  * @property {string} code - The unique authorization code string.
  * @property {string} userId - The identifier of the user who authorized the client.

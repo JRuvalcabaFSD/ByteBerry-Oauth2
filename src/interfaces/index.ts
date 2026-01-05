@@ -8,6 +8,9 @@ export * from './container/container.interface.js';
 export * from './http/http.request.interface.js';
 export * from './http/http.server.interface.js';
 
+//Middleware
+export * from './middleware/session.handler.interface.js';
+
 //Repositories
 export * from './repositories/user.repository.interface.js';
 export * from './repositories/session.repository.interface.js';
