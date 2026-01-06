@@ -86,7 +86,7 @@ export class LoginRequestDTO {
 	 */
 
 	public static fromBody(body: Record<string, string>, ip?: string): LoginRequestDTO {
-		const resp = LoginRequestSchema.safeParse({ ...body, ip });
+		const resp = LoginRequestSchema.safeParse({ ...body, ipAddress: ip });
 
 		if (!resp.success) {
 			const formattedError = formattedZodError(resp.error, 'form');

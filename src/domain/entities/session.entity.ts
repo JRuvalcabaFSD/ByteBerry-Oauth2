@@ -64,6 +64,37 @@ export interface SessionProps extends Omit<SessionData, 'createdAt' | 'expiresAt
  * @method toObject - Serializes the session entity to a plain object.
  */
 
+/**
+ * Represents a user session entity with expiration and validation capabilities.
+ *
+ * The `SessionEntity` class encapsulates session data including user identification,
+ * temporal information (creation and expiration dates), and optional contextual metadata
+ * such as user agent and IP address. It provides methods for session lifecycle management,
+ * including expiration checks, time-to-live calculations, and session extension.
+ *
+ * @remarks
+ * - Sessions are immutable after creation. Methods that modify session state return new instances.
+ * - The `userAgent` and `ipAddress` properties are optional and default to `null`.
+ * - The `metadata` property is optional and defaults to an empty object.
+ * - Session expiration is determined by comparing the current time against the `expiresAt` property.
+ *
+ * @example
+ * ```typescript
+ * const session = SessionEntity.create({
+ *   id: 'session-123',
+ *   userId: 'user-456',
+ *   ttlSeconds: 3600,
+ *   userAgent: 'Mozilla/5.0...',
+ *   ipAddress: '192.168.1.1'
+ * });
+ *
+ * if (session.isValid()) {
+ *   const remaining = session.getRemainingSeconds();
+ *   const extended = session.extend(1800); // Extend by 30 minutes
+ * }
+ * ```
+ */
+
 export class SessionEntity {
 	public readonly id!: string;
 	public readonly userId!: string;
@@ -121,7 +152,7 @@ export class SessionEntity {
 	 */
 
 	public isExpired(): boolean {
-		return new Date() > this.expiresAt;
+		return new Date() >= this.expiresAt;
 	}
 
 	/**

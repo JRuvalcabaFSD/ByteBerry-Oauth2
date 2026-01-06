@@ -93,7 +93,7 @@ export const LoginRequestSchema: ZodType<LoginRequestData> = object({
 	password: requiredString('Password').pipe(maxMinString({ field: 'Password', min: 6, max: 24 })),
 	rememberMe: boolean('remember me must be a boolean').optional(),
 	userAgent: string().optional(),
-	ip: ipString('Ip').optional(),
+	ipAddress: ipString('Ip').optional(),
 });
 
 /**

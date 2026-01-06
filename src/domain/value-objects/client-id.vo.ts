@@ -36,11 +36,13 @@ export class ClientIdVO {
 	 *
 	 * @param value - The client ID string to validate and encapsulate.
 	 * @returns A new `ClientIdVO` instance containing the validated client ID.
-	 * @throws {ValueObjectError} If the client ID is empty, or its length is not between 8 and 128 characters.
+	 * @throws {ValueObjectError} If the client ID is null, undefined, empty, or its length is not between 8 and 128 characters.
 	 */
 
-	static create(value: string): ClientIdVO {
-		if (!value || value.trim().length === 0) throw new ValueObjectError('Client ID cannot be empty');
+	static create(value: string | null | undefined): ClientIdVO {
+		if (value === null) throw new ValueObjectError('Client ID cannot be null');
+		if (value === undefined) throw new ValueObjectError('Client ID cannot be undefined');
+		if (value.trim().length === 0) throw new ValueObjectError('Client ID cannot be empty');
 		if (value.length < 8 || value.length > 128) throw new ValueObjectError('Client ID must be between 8 and 128 characters');
 		return new ClientIdVO(value);
 	}
