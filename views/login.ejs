@@ -49,7 +49,9 @@
 
 			<!-- Form -->
 			<form id="loginForm" class="space-y-6">
-				<%# TODO poner código para redirect_url %>
+				<!-- Campo hidden para return_url -->
+				<input type="hidden" name="return_url" value="<%= returnUrl || '' %>">
+
 				<!-- Email/Username Input -->
 				<div>
 					<label for="emailOrUserName" class="block text-sm font-medium text-gray-300 mb-2">

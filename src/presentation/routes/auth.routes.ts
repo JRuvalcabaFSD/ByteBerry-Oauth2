@@ -1,12 +1,13 @@
 import { RequestHandler, Router } from 'express';
 
-import { AuthController, LoginController, TokenController } from '@presentation';
+import { AuthController, JwksController, LoginController, TokenController } from '@presentation';
 
 //TODO documentar
 export function createAuthRoutes(
 	loginCtl: LoginController,
 	authCtl: AuthController,
 	tokenCtl: TokenController,
+	jwksCtl: JwksController,
 	requireSession: RequestHandler
 ): Router {
 	const router = Router();
@@ -15,5 +16,6 @@ export function createAuthRoutes(
 	router.post('/login', loginCtl.login);
 	router.get('/authorize', requireSession, authCtl.handle);
 	router.post('/token', tokenCtl.handle);
+	router.get('/.well-known/jwks.json', jwksCtl.handle);
 	return router;
 }

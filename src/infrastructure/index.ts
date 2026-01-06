@@ -14,6 +14,7 @@ import './repositories/inMemory-client.repository.js';
 import './services/key-loader.service.js';
 import './services/jwt.service.js';
 import './services/hash.service.js';
+import './services/jwks.service.js';
 
 // ======================================
 // Export modules
@@ -48,3 +49,4 @@ export * from './services/winston-logger.service.js';
 export * from './services/key-loader.service.js';
 export * from './services/jwt.service.js';
 export * from './services/hash.service.js';
+export * from './services/jwks.service.js';

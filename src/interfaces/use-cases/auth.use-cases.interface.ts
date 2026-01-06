@@ -1,5 +1,6 @@
 import { CodeRequestDTO, CodeResponseDTO, LoginRequestDTO, LoginResponseDTO, TokenRequestDTO, TokenResponseDTO } from '@application';
 import { CodeChallengeVO } from '@domain';
+import { JwksResponse } from '@interfaces';
 
 //TODO documentar
 declare module '@ServiceMap' {
@@ -8,6 +9,7 @@ declare module '@ServiceMap' {
 		GenerateCodeUseCase: IGenerateAuthCodeUseCase;
 		PkceVerifierUseCase: IPkceVerifierUseCase;
 		ExchangeTokenUseCase: IExchangeTokenUseCase;
+		GetJwksUseCase: IGetJwksUseCase;
 	}
 }
 
@@ -88,4 +90,25 @@ export interface IPkceVerifierUseCase {
 
 export interface IExchangeTokenUseCase {
 	execute(request: TokenRequestDTO): Promise<TokenResponseDTO>;
+}
+
+/**
+ * Use case interface for retrieving JSON Web Key Set (JWKS).
+ *
+ * This interface defines the contract for a use case that fetches the JWKS,
+ * which contains the public keys used to verify JWT tokens.
+ *
+ * @interface IJwksServiceUseCase
+ * @example
+ * ```typescript
+ * class JwksService implements IJwksServiceUseCase {
+ *   async execute(): Promise<JwksResponse> {
+ *     // Implementation to fetch JWKS
+ *   }
+ * }
+ * ```
+ */
+
+export interface IGetJwksUseCase {
+	execute(): Promise<JwksResponse>;
 }

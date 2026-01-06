@@ -40,13 +40,14 @@ export class LoginController {
 				this.logger.debug('User already has session cookie', { sessionId: existingSessionId });
 			}
 
+			const returnUrl = typeof req.query.return_url === 'string' ? req.query.return_url : '';
+
 			const nonce = randomBytes(16).toString('base64');
 			res.set('Content-Security-Policy', `script-src 'self' 'nonce-${nonce}';`);
 			res.render('login', {
 				version: this.config.version || '0.0.0',
 				nonce,
-				// TODO Prepare redirect
-				// returnUrl: returnUrl || '',
+				returnUrl: returnUrl || '',
 			});
 
 			this.logger.debug('Login form rendered successfully');

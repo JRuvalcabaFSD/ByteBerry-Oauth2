@@ -2,13 +2,14 @@ import { NextFunction, Request, Response } from 'express';
 
 import { Injectable, InvalidCodeError } from '@shared';
 import { CodeRequestDTO, TokenRequestDTO } from '@application';
-import type { IExchangeTokenUseCase, IGenerateAuthCodeUseCase } from '@interfaces';
+import type { IExchangeTokenUseCase, IGenerateAuthCodeUseCase, IGetJwksUseCase } from '@interfaces';
 
 //TODO documentar
 declare module '@ServiceMap' {
 	interface ServiceMap {
-		AuthController: AuthController;
+		authController: AuthController;
 		tokenController: TokenController;
+		jwksController: JwksController;
 	}
 }
 
@@ -28,7 +29,7 @@ declare module '@ServiceMap' {
  * ```
  */
 
-@Injectable({ name: 'AuthController', depends: ['GenerateCodeUseCase'] })
+@Injectable({ name: 'authController', depends: ['GenerateCodeUseCase'] })
 export class AuthController {
 	constructor(private readonly useCase: IGenerateAuthCodeUseCase) {}
 
@@ -73,6 +74,36 @@ export class TokenController {
 			const request = TokenRequestDTO.fromBody(req.body);
 			const response = await this.useCase.execute(request);
 			res.status(200).json(response.toJson());
+		} catch (error) {
+			next(error);
+		}
+	};
+}
+
+/**
+ * Controller responsible for handling JWKS (JSON Web Key Set) endpoint requests.
+ *
+ * @remarks
+ * This controller exposes the public keys used to verify JWT signatures.
+ * It sets appropriate caching headers (1 hour) and security headers to optimize
+ * performance and protect against MIME type sniffing attacks.
+ *
+ * @example
+ * ```typescript
+ * const jwksController = new JwksController(getJwksUseCase);
+ * app.get('/.well-known/jwks.json', jwksController.handle);
+ * ```
+ */
+
+@Injectable({ name: 'jwksController', depends: ['GetJwksUseCase'] })
+export class JwksController {
+	constructor(private readonly useCase: IGetJwksUseCase) {}
+
+	public handle = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		try {
+			const jwks = await this.useCase.execute();
+			res.set({ 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600', 'X-Content-Type-Options': 'nosniff' });
+			res.json(jwks);
 		} catch (error) {
 			next(error);
 		}
