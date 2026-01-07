@@ -12,11 +12,16 @@ export * from './http/middlewares/security.middleware.js';
 export * from './lifecycle/shutdown.js';
 export * from './lifecycle/shutdown-config.js';
 
+//Mappers
+export * from './mappers/client.mapper.js';
+export * from './mappers/session.mapper.js';
+export * from './mappers/code.mapper.js';
+
 //Repositories
-export * from './repositories/inMemory-user.repository.js';
-export * from './repositories/inMemory-session.repository.js';
-export * from './repositories/inMemory-code.repository.js';
-export * from './repositories/inMemory-client.repository.js';
+export * from './repositories/prisma-client.repository.js';
+export * from './repositories/prisma-code.repository.js';
+export * from './repositories/prisma-session.repository.js';
+export * from './repositories/prisma-user.repository.js';
 
 //Services
 export * from './services/clock.service.js';
