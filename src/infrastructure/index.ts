@@ -1,17 +1,3 @@
-// ======================================
-// import modules for implements decorators
-// ======================================
-import './services/clock.service.js';
-import './services/health.service.js';
-import './services/uuid.service.js';
-import './services/winston-logger.service.js';
-import './http/http.server.js';
-import './lifecycle/shutdown.js';
-
-// ======================================
-// Export modules
-// ======================================
-
 //Http
 export * from './http/http.server.js';
 
@@ -26,9 +12,19 @@ export * from './http/middlewares/security.middleware.js';
 export * from './lifecycle/shutdown.js';
 export * from './lifecycle/shutdown-config.js';
 
+//Repositories
+export * from './repositories/inMemory-user.repository.js';
+export * from './repositories/inMemory-session.repository.js';
+export * from './repositories/inMemory-code.repository.js';
+export * from './repositories/inMemory-client.repository.js';
+
 //Services
 export * from './services/clock.service.js';
 export * from './services/health-register.service.js';
 export * from './services/health.service.js';
 export * from './services/uuid.service.js';
 export * from './services/winston-logger.service.js';
+export * from './services/key-loader.service.js';
+export * from './services/jwt.service.js';
+export * from './services/hash.service.js';
+export * from './services/jwks.service.js';

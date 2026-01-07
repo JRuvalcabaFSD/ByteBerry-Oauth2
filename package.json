@@ -16,8 +16,12 @@
 		"npm": ">=10.20.0"
 	},
 	"scripts": {
-		"dev": "pnpm type-check && tsx --watch src/app.ts",
+		"dev": "pnpm run dev:app --parallel & pnpm run dev:css",
+		"dev:css": "tailwindcss -i ./views/input.css -o ./public/css/output.css --postcss --watch",
+		"dev:app": "pnpm type-check && tsx --watch src/app.ts",
 		"start": "node dist/src/app.js",
+		"ci:all": "./scripts/test-release.sh",
+		"quality": "pnpm type-check && pnpm lint && pnpm audit && pnpm test:unit",
 		"test:all": "pnpm test:unit && pnpm test:integration",
 		"test:coverage:all": "pnpm test:unit:coverage && pnpm test:integration",
 		"test:coverage": "vitest run --coverage --config vitest.unit.config.ts",
@@ -41,7 +45,8 @@
 		"prebuild": "pnpm clean",
 		"docker:build": "TEST_VERSION=dev ./scripts/docker-build.sh",
 		"docker:run": "docker run --rm -p 4000:4000 --env-file .env jruvalcabafsd/byteberry-oauth2:dev",
-		"docs:build": "rimraf docs && typedoc --options typedoc.json"
+		"docs:build": "rimraf docs && typedoc --options typedoc.json",
+		"generate:keys": "node scripts/generate-keys.mjs"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.1.0",

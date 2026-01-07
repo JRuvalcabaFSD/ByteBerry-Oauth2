@@ -44,9 +44,20 @@ export interface IConfig extends HealthCheckable {
 	readonly serviceUrl: string;
 	readonly logLevel: LogLevel;
 	readonly logRequests: boolean;
+	readonly autoCleanupIntervalMs: number;
+
+	//OAuth2 environments
+	readonly oauth2AuthCodeExpiresIn: number;
+
+	//JWT environments
+	readonly jwtKeyId: string;
+	readonly jwtIssuer: string;
+	readonly jwtAudience: string[];
+	readonly jwtAccessTokenExpiresIn: number;
 
 	//Security
 	readonly corsOrigins: string[];
+	readonly bcryptRounds: number;
 
 	//Functions.
 	isDevelopment(): boolean;

@@ -1,14 +1,17 @@
 import { Router, Request, Response } from 'express';
 
+import * as Controllers from '@presentation';
+import * as Routes from '@presentation';
+
 import { Injectable } from '@shared';
-import type { HomeResponse, IClock, IConfig, IHealthService } from '@interfaces';
-import { createHealthRoutes } from './health.routes.js';
+import { createSessionMiddleware, RedirectToLoginErrorHandle } from '@presentation';
+import type { HomeResponse, IClock, IConfig, IHealthService, ILogger, ISessionRepository } from '@interfaces';
 
 /**
- * Extends the global ServiceMap interface to include the IConfig interface.
- * This allows for type-safe access to configuration settings throughout the application.
+ * Augments the ServiceMap interface to include the AppRouter service.
  * @module @ServiceMap
  * @interface ServiceMap
+ * @property {AppRouter} AppRouter - The application router service.
  */
 
 declare module '@ServiceMap' {
@@ -18,14 +21,33 @@ declare module '@ServiceMap' {
 }
 
 //TODO documentar
-@Injectable({ name: 'AppRouter', depends: ['Config', 'Clock', 'HealthService'] })
+@Injectable({
+	name: 'AppRouter',
+	depends: [
+		'Config',
+		'Clock',
+		'SessionRepository',
+		'Logger',
+		'HealthService',
+		'LoginController',
+		'authController',
+		'tokenController',
+		'jwksController',
+	],
+})
 export class AppRouter {
 	private readonly router: Router;
 
 	constructor(
 		private readonly config: IConfig,
 		private readonly clock: IClock,
-		private readonly heathService: IHealthService
+		private readonly sessionRepository: ISessionRepository,
+		private readonly logger: ILogger,
+		private readonly heathService: IHealthService,
+		private readonly loginCtl: Controllers.LoginController,
+		private readonly authCtl: Controllers.AuthController,
+		private readonly tokenCtl: Controllers.TokenController,
+		private readonly jwksCtl: Controllers.JwksController
 	) {
 		this.router = Router();
 		this.setupRoutes();
@@ -53,8 +75,17 @@ export class AppRouter {
 	private setupRoutes(): void {
 		const baseurl = `${this.config.serviceUrl}:${this.config.port}`;
 
+		// TODO RequireSession
+		// const requireSession = createSessionMiddleware(this.sessionRepository, this.logger, { onError: new UnAuthorizedErrorHandle() });
+		const requireSessionRedirect = createSessionMiddleware(this.sessionRepository, this.logger, {
+			onError: new RedirectToLoginErrorHandle(),
+		});
+
+		//Auth
+		this.router.use('/auth', Routes.createAuthRoutes(this.loginCtl, this.authCtl, this.tokenCtl, this.jwksCtl, requireSessionRedirect));
+
 		//Health
-		this.router.use('/health', createHealthRoutes(this.heathService));
+		this.router.use('/health', Routes.createHealthRoutes(this.heathService));
 
 		this.router.get('/', (req: Request, res: Response) => {
 			const homeResponse: HomeResponse = {
@@ -94,11 +125,11 @@ export class AppRouter {
 			{ name: 'home', value: `${baseUrl}/`, method: 'GET' },
 			{ name: 'deepHealth', value: `${baseUrl}/health/deep`, method: 'GET' },
 			{ name: 'health', value: `${baseUrl}/health`, method: 'GET' },
-			// { name: 'authorize', value: `${baseUrl}/auth/authorize`, method: 'GET' },
-			// { name: 'JWKS', value: `${baseUrl}/auth/.well-known/jwks.json`, method: 'GET' },
-			// { name: 'login', value: `${baseUrl}/auth/login`, method: 'POST' },
-			// { name: 'login', value: `${baseUrl}/auth/login`, method: 'GET' },
-			// { name: 'token', value: `${baseUrl}/auth/token`, method: 'POST' },
+			{ name: 'authorize', value: `${baseUrl}/auth/authorize`, method: 'GET' },
+			{ name: 'JWKS', value: `${baseUrl}/auth/.well-known/jwks.json`, method: 'GET' },
+			{ name: 'login', value: `${baseUrl}/auth/login`, method: 'POST' },
+			{ name: 'login', value: `${baseUrl}/auth/login`, method: 'GET' },
+			{ name: 'token', value: `${baseUrl}/auth/token`, method: 'POST' },
 			// { name: 'user', value: `${baseUrl}/user/register`, method: 'POST' },
 			// { name: 'currentUser', value: `${baseUrl}/user/me`, method: 'GET' },
 			// { name: 'update', value: `${baseUrl}/user/me`, method: 'PUT' },
