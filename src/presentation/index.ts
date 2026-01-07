@@ -1,6 +1,3 @@
-import './controller/login.controller.js';
-import './controller/auth.controller.js';
-
 //Controllers
 export * from './controller/login.controller.js';
 export * from './controller/auth.controller.js';

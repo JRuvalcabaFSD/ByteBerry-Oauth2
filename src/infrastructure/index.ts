@@ -1,25 +1,3 @@
-// ======================================
-// import modules for implements decorators
-// ======================================
-import './services/clock.service.js';
-import './services/health.service.js';
-import './services/uuid.service.js';
-import './services/winston-logger.service.js';
-import './http/http.server.js';
-import './lifecycle/shutdown.js';
-import './repositories/inMemory-user.repository.js';
-import './repositories/inMemory-session.repository.js';
-import './repositories/inMemory-code.repository.js';
-import './repositories/inMemory-client.repository.js';
-import './services/key-loader.service.js';
-import './services/jwt.service.js';
-import './services/hash.service.js';
-import './services/jwks.service.js';
-
-// ======================================
-// Export modules
-// ======================================
-
 //Http
 export * from './http/http.server.js';
 

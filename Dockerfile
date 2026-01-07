@@ -46,9 +46,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 COPY tsconfig*.json ./
 COPY src ./src
 COPY scripts ./scripts
-# TODO F1
-# COPY --chown=root:root public/ ./public/
-# COPY views ./views
+COPY --chown=root:root public/ ./public/
+COPY views ./views
 
 
 # DATABASE_URL dummy para Prisma generate
@@ -118,16 +117,14 @@ COPY --from=builder --chown=nodejs:nodejs /app/package.json ./
 # COPY prisma.config.ts ./
 
 # Copiar scripts necesarios
-# TODO F1
-# COPY --chown=nodejs:nodejs scripts/docker-entrypoint.sh ./scripts/
-# COPY --chown=nodejs:nodejs scripts/generate-keys.mjs ./scripts/
+COPY --chown=nodejs:nodejs scripts/docker-entrypoint.sh ./scripts/
+COPY --chown=nodejs:nodejs scripts/generate-keys.mjs ./scripts/
 COPY --chown=nodejs:nodejs scripts/healthCheck.cjs ./scripts/
 
 # Hacer scripts ejecutables
-RUN chmod +x scripts/healthCheck.cjs
-# TODO F1
-# chmod +x scripts/docker-entrypoint.sh && \
-# RUN chmod +x scripts/generate-keys.mjs
+RUN chmod +x scripts/healthCheck.cjs && \
+	chmod +x scripts/docker-entrypoint.sh && \
+	chmod +x scripts/generate-keys.mjs
 
 # Cambiar a usuario no-root
 USER nodejs
@@ -139,9 +136,8 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 	CMD ["node", "scripts/healthCheck.cjs"]
 
-# TODO F1
 # Entry point
-# ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "./scripts/docker-entrypoint.sh"]
 
 
 # Variables de entorno por defecto
