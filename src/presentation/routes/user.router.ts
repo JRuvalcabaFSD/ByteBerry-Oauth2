@@ -6,5 +6,6 @@ import { UserController } from '@presentation';
 export function createUserRoutes(controller: UserController, requireSession: RequestHandler): Router {
 	const router = Router();
 	router.post('/', controller.register);
+	router.get('/', requireSession, controller.getMe);
 	return router;
 }
