@@ -4,8 +4,8 @@ import * as Controllers from '@presentation';
 import * as Routes from '@presentation';
 
 import { Injectable } from '@shared';
-import { createSessionMiddleware, RedirectToLoginErrorHandle } from '@presentation';
 import type { HomeResponse, IClock, IConfig, IHealthService, ILogger, ISessionRepository } from '@interfaces';
+import { createSessionMiddleware, createUserRoutes, RedirectToLoginErrorHandle, UnAuthorizedErrorHandle } from '@presentation';
 
 /**
  * Augments the ServiceMap interface to include the AppRouter service.
@@ -33,6 +33,7 @@ declare module '@ServiceMap' {
 		'authController',
 		'tokenController',
 		'jwksController',
+		'UserController',
 	],
 })
 export class AppRouter {
@@ -47,7 +48,8 @@ export class AppRouter {
 		private readonly loginCtl: Controllers.LoginController,
 		private readonly authCtl: Controllers.AuthController,
 		private readonly tokenCtl: Controllers.TokenController,
-		private readonly jwksCtl: Controllers.JwksController
+		private readonly jwksCtl: Controllers.JwksController,
+		private readonly userCtl: Controllers.UserController
 	) {
 		this.router = Router();
 		this.setupRoutes();
@@ -75,11 +77,13 @@ export class AppRouter {
 	private setupRoutes(): void {
 		const baseurl = `${this.config.serviceUrl}:${this.config.port}`;
 
-		// TODO RequireSession
-		// const requireSession = createSessionMiddleware(this.sessionRepository, this.logger, { onError: new UnAuthorizedErrorHandle() });
+		const requireSession = createSessionMiddleware(this.sessionRepository, this.logger, { onError: new UnAuthorizedErrorHandle() });
 		const requireSessionRedirect = createSessionMiddleware(this.sessionRepository, this.logger, {
 			onError: new RedirectToLoginErrorHandle(),
 		});
+
+		// User
+		this.router.use('/user', createUserRoutes(this.userCtl, requireSession));
 
 		//Auth
 		this.router.use('/auth', Routes.createAuthRoutes(this.loginCtl, this.authCtl, this.tokenCtl, this.jwksCtl, requireSessionRedirect));

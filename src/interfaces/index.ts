@@ -30,3 +30,4 @@ export * from './services/uuid.service.interface.js';
 //Use cases
 export * from './use-cases/auth.use-cases.interface.js';
 export * from './use-cases/client.use-cases.interface.js';
+export * from './use-cases/user.use-cases.interface.js';

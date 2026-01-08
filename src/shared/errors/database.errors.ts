@@ -19,7 +19,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
  * @param cause - The underlying cause of the error, if any.
  */
 
-class DatabaseError extends Error {
+export class DatabaseError extends Error {
 	public statusCode = 422;
 	public readonly errorType = 'database';
 	constructor(message = 'Database operation failed', cause?: unknown) {
