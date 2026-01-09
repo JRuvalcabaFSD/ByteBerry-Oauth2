@@ -211,3 +211,54 @@ export class ListClientResponseDTO {
 		};
 	}
 }
+
+/**
+ * Data Transfer Object for client responses.
+ *
+ * Provides a structured way to serialize and deserialize client entities
+ * for API responses, with automatic date formatting to ISO 8601 strings.
+ *
+ * @class ClientResponseDTO
+ *
+ * @property {Client} client - The client entity data.
+ *
+ * @example
+ * ```typescript
+ * const clientResponse = ClientResponseDTO.fromEntity(clientEntity);
+ * const json = clientResponse.toJSON();
+ * ```
+ */
+
+export class ClientResponseDTO {
+	public readonly client!: Client;
+
+	private constructor(data: { client: Client }) {
+		Object.assign(this, data);
+	}
+
+	/**
+	 * Converts a ClientEntity to a ClientResponseDTO.
+	 * @param client - The ClientEntity instance to convert.
+	 * @returns A new ClientResponseDTO containing the client data.
+	 */
+
+	public static fromEntity(client: ClientEntity): ClientResponseDTO {
+		return new ClientResponseDTO({ client: { ...client } });
+	}
+
+	/**
+	 * Serializes the client object to a JSON-compatible format.
+	 * Converts date properties (createdAt, updatedAt) to ISO 8601 string format.
+	 * @returns An object containing the serialized client with ISO-formatted timestamps.
+	 */
+
+	public toJSON(): { client: ClientObject } {
+		return {
+			client: {
+				...this.client,
+				createdAt: this.client.createdAt.toISOString(),
+				updatedAt: this.client.updatedAt.toISOString(),
+			},
+		};
+	}
+}

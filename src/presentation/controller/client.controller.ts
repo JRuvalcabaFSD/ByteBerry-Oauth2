@@ -1,5 +1,5 @@
 import { CreateClientRequestDTO } from '@application';
-import type { ICreateClientUseCase, IListClientUseCase } from '@interfaces';
+import type { ICreateClientUseCase, IGetClientByIdUseCase, IListClientUseCase } from '@interfaces';
 import { Injectable } from '@shared';
 import { NextFunction, Request, Response } from 'express';
 
@@ -10,11 +10,12 @@ declare module '@ServiceMap' {
 	}
 }
 
-@Injectable({ name: 'ClientController', depends: ['CreateClientUseCase', 'ListClientUseCase'] })
+@Injectable({ name: 'ClientController', depends: ['CreateClientUseCase', 'ListClientUseCase', 'GetClientByIdUseCase'] })
 export class ClientController {
 	constructor(
 		private readonly createUseCase: ICreateClientUseCase,
-		private readonly listUseCase: IListClientUseCase
+		private readonly listUseCase: IListClientUseCase,
+		private readonly getUseCase: IGetClientByIdUseCase
 	) {}
 
 	/**
@@ -58,6 +59,34 @@ export class ClientController {
 		try {
 			const userId = req.user!.userId;
 			const response = await this.listUseCase.execute(userId);
+
+			res.status(200).json(response.toJSON());
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	/**
+	 * Retrieves a client by its ID for the authenticated user.
+	 *
+	 * @param req - The Express request object containing the authenticated user and client ID in params
+	 * @param res - The Express response object used to send the JSON response
+	 * @param next - The Express next function for error handling
+	 * @returns A promise that resolves to void
+	 *
+	 * @throws Will pass errors to the next middleware via the error handler
+	 *
+	 * @example
+	 * // GET /clients/:id
+	 * // Returns the client details in JSON format with a 200 status code
+	 */
+
+	public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		try {
+			const userId = req.user!.userId;
+			const clientId = req.params.id;
+
+			const response = await this.getUseCase.execute(userId, clientId);
 
 			res.status(200).json(response.toJSON());
 		} catch (error) {

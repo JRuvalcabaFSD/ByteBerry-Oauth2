@@ -1,4 +1,4 @@
-import { object, ZodType } from 'zod';
+import z from 'zod';
 import { requiredString, maxMinString, urlsArray, grantTypesArray, booleanString } from './helpers.js';
 /**
  * Represents the data required to create a new OAuth client.
@@ -28,14 +28,16 @@ export interface CreateClientData {
  * @returns {CreateClientData} Validated and transformed client creation data with normalized grant types and default isPublic value
  */
 
-export const CreateClientSchema: ZodType<CreateClientData> = object({
-	clientName: requiredString('Client name').pipe(maxMinString({ field: 'Client name', min: 3, max: 30 })),
-	redirectUris: urlsArray('redirectUris'),
-	grantTypes: grantTypesArray('Grand types').optional(),
-	isPublic: booleanString('isPublic').optional(),
-}).transform((data) => ({
-	clientName: data.clientName,
-	redirectUris: data.redirectUris,
-	grantTypes: data.grantTypes,
-	isPublic: data.isPublic ?? true,
-}));
+export const CreateClientSchema: z.ZodType<CreateClientData> = z
+	.object({
+		clientName: requiredString('Client name').pipe(maxMinString({ field: 'Client name', min: 3, max: 30 })),
+		redirectUris: urlsArray('redirectUris'),
+		grantTypes: grantTypesArray('Grand types').optional(),
+		isPublic: booleanString('isPublic').optional(),
+	})
+	.transform((data) => ({
+		clientName: data.clientName,
+		redirectUris: data.redirectUris,
+		grantTypes: data.grantTypes,
+		isPublic: data.isPublic ?? true,
+	}));

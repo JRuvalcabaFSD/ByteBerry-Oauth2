@@ -12,6 +12,7 @@ declare module '@ServiceMap' {
 		ValidateClientUseCase: IValidateClientUseCase;
 		CreateClientUseCase: ICreateClientUseCase;
 		ListClientUseCase: IListClientUseCase;
+		GetClientByIdUseCase: IGetClientByIdUseCase;
 	}
 }
 
@@ -73,4 +74,17 @@ export interface ICreateClientUseCase {
 
 export interface IListClientUseCase {
 	execute(userId: string): Promise<Dtos.ListClientResponseDTO>;
+}
+
+/**
+ * Use case for retrieving a client by its ID.
+ * @interface IGetClientByIdUseCase
+ * @method execute - Fetches a client's details for a given user and client ID.
+ * @param {string} userId - The ID of the user requesting the client information.
+ * @param {string} clientId - The ID of the client to retrieve.
+ * @returns {Promise<Dtos.ClientResponseDTO>} A promise that resolves to the client response DTO containing the client's details.
+ */
+
+export interface IGetClientByIdUseCase {
+	execute(userId: string, clientId: string): Promise<Dtos.ClientResponseDTO>;
 }

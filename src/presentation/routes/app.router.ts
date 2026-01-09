@@ -146,6 +146,7 @@ export class AppRouter {
 			{ name: 'updatePassword', value: `${baseUrl}/user/me/password`, method: 'PUT' },
 			{ name: 'createClient', value: `${baseUrl}/client`, method: 'POST' },
 			{ name: 'listClients', value: `${baseUrl}/client`, method: 'GET' },
+			{ name: 'getClient', value: `${baseUrl}/client/:id`, method: 'GET' },
 		];
 
 		return routes.reduce(
