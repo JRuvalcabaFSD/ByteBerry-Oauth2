@@ -1,4 +1,4 @@
-import { CreateClientRequestDTO, CreateClientResponseDTO, ValidateClientRequestDto, ValidateClientResponseDto } from '@application';
+import * as Dtos from '@application';
 
 /**
  * Extends the global ServiceMap interface to include the IConfig interface.
@@ -11,6 +11,7 @@ declare module '@ServiceMap' {
 	interface ServiceMap {
 		ValidateClientUseCase: IValidateClientUseCase;
 		CreateClientUseCase: ICreateClientUseCase;
+		ListClientUseCase: IListClientUseCase;
 	}
 }
 
@@ -39,7 +40,7 @@ declare module '@ServiceMap' {
  */
 
 export interface IValidateClientUseCase {
-	execute(data: ValidateClientRequestDto): Promise<ValidateClientResponseDto>;
+	execute(data: Dtos.ValidateClientRequestDto): Promise<Dtos.ValidateClientResponseDto>;
 }
 
 /**
@@ -53,5 +54,23 @@ export interface IValidateClientUseCase {
  */
 
 export interface ICreateClientUseCase {
-	execute(userId: string, request: CreateClientRequestDTO): Promise<CreateClientResponseDTO>;
+	execute(userId: string, request: Dtos.CreateClientRequestDTO): Promise<Dtos.CreateClientResponseDTO>;
+}
+
+/**
+ * Use case interface for listing clients associated with a user.
+ *
+ * @interface IListClientUseCase
+ *
+ * @method execute
+ * @param {string} userId - The unique identifier of the user whose clients are to be listed.
+ * @returns {Promise<ListClientResponseDTO>} A promise that resolves to a DTO containing the list of clients for the specified user.
+ *
+ * @example
+ * const listClientUseCase: IListClientUseCase = new ListClientUseCase();
+ * const result = await listClientUseCase.execute('user-123');
+ */
+
+export interface IListClientUseCase {
+	execute(userId: string): Promise<Dtos.ListClientResponseDTO>;
 }

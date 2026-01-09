@@ -156,3 +156,58 @@ export class CreateClientResponseDTO {
 		};
 	}
 }
+
+/**
+ * Data Transfer Object for listing clients in response.
+ *
+ * This DTO is responsible for transforming client entities into a standardized response format.
+ * It provides methods to create instances from client entities and serialize them to JSON.
+ *
+ * @class ListClientResponseDTO
+ *
+ * @property {Array<Client>} clients - Array of client objects to be returned in the response.
+ *
+ * @example
+ * const clients = await clientRepository.findAll();
+ * const response = ListClientResponseDTO.fromEntities(clients);
+ * const json = response.toJSON();
+ */
+
+export class ListClientResponseDTO {
+	public readonly clients!: Array<Client>;
+
+	private constructor(data: { clients: Array<Client> }) {
+		Object.assign(this, data);
+	}
+
+	/**
+	 * Creates a ListClientResponseDTO from an array of ClientEntity objects.
+	 * @param clients - Array of ClientEntity instances to convert
+	 * @returns ListClientResponseDTO containing the public client data with timestamps
+	 */
+
+	public static fromEntities(clients: ClientEntity[]): ListClientResponseDTO {
+		return new ListClientResponseDTO({
+			clients: clients.map((client) => ({ ...client.toPublic(), createdAt: client.createdAt, updatedAt: client.updatedAt })),
+		});
+	}
+
+	/**
+	 * Serializes the clients collection to a JSON-compatible object.
+	 * Converts all client objects to a serializable format by transforming
+	 * Date objects (createdAt, updatedAt) to ISO 8601 string representations.
+	 *
+	 * @returns An object containing an array of serialized client objects with
+	 *          date properties converted to ISO strings.
+	 */
+
+	public toJSON(): { clients: Array<ClientObject> } {
+		return {
+			clients: this.clients.map((client) => ({
+				...client,
+				createdAt: client.createdAt.toISOString(),
+				updatedAt: client.updatedAt.toISOString(),
+			})),
+		};
+	}
+}
