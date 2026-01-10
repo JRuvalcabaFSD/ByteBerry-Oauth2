@@ -34,10 +34,10 @@ export interface IConsentRepository {
 	/**
 	 * Finds all consent records associated with a specific user.
 	 * @param userId - The unique identifier of the user
-	 * @returns A promise that resolves to the consent entity if found, otherwise null
+	 * @returns A promise that resolves to an array of consent entities, or null if none are found
 	 */
 
-	findByUserId(userId: string): Promise<ConsentEntity | null>;
+	findByUserId(userId: string): Promise<ConsentEntity[] | null>;
 
 	/**
 	 * Revokes a consent record by its ID.

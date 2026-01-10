@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { Injectable } from '@shared';
 import { RegisterUserRequestDTO, UpdatePasswordRequestDTO, UpdateUserRequestDTO } from '@application';
-import type { IGetUserUseCase, IRegisterUserUseCase, IUpdatePasswordUseCase, IUpdateUserUseCase } from '@interfaces';
+import type { IGetUserUseCase, IListClientUseCase, IRegisterUserUseCase, IUpdatePasswordUseCase, IUpdateUserUseCase } from '@interfaces';
 
 //TODO documentar
 declare module '@ServiceMap' {
@@ -12,39 +12,44 @@ declare module '@ServiceMap' {
 }
 
 /**
- * Controller responsible for handling user-related HTTP requests.
+ * Controller for handling user-related HTTP requests.
  *
- * @remarks
- * This controller implements user management operations including registration,
- * retrieval, updates, and password management. It follows the dependency injection
- * pattern and delegates business logic to respective use case implementations.
+ * @class UserController
  *
- * All methods are designed to work with Express middleware and follow a consistent
- * error handling pattern by passing errors to the next middleware function.
+ * @description
+ * Manages user operations including registration, profile retrieval and updates,
+ * password management, and consent listing. All methods follow Express middleware
+ * conventions with error handling via next() function.
  *
  * @example
  * ```typescript
  * const userController = new UserController(
  *   registerUseCase,
- *   getUserUseCase,
+ *   getUseCase,
  *   updateUserUseCase,
- *   updatePasswordUseCase
+ *   updatePasswordUseCase,
+ *   listConsentUseCase
  * );
- *
- * router.post('/register', userController.register);
- * router.get('/me', authenticate, userController.getMe);
- * router.put('/me', authenticate, userController.updateMe);
- * router.put('/me/password', authenticate, userController.updatePassword);
  * ```
+ *
+ * @see {@link IRegisterUserUseCase}
+ * @see {@link IGetUserUseCase}
+ * @see {@link IUpdateUserUseCase}
+ * @see {@link IUpdatePasswordUseCase}
+ * @see {@link IListClientUseCase}
  */
 
-@Injectable({ name: 'UserController', depends: ['RegisterUserUseCase', 'GetUserUseCase', 'UpdateUserUseCase', 'UpdatePasswordUseCase'] })
+@Injectable({
+	name: 'UserController',
+	depends: ['RegisterUserUseCase', 'GetUserUseCase', 'UpdateUserUseCase', 'UpdatePasswordUseCase', 'ListConsentsUseCase'],
+})
 export class UserController {
 	constructor(
 		private readonly registerUseCase: IRegisterUserUseCase,
 		private readonly getUseCase: IGetUserUseCase,
 		private readonly updateUserUseCase: IUpdateUserUseCase,
-		private readonly updatePasswordUseCase: IUpdatePasswordUseCase
+		private readonly updatePasswordUseCase: IUpdatePasswordUseCase,
+		private readonly listConsentUseCase: IListClientUseCase
 	) {}
 
 	/**
@@ -141,6 +146,27 @@ export class UserController {
 			const userId = req.user!.userId;
 			const request = UpdatePasswordRequestDTO.fromBody(req.body);
 			const response = await this.updatePasswordUseCase.execute(userId, request);
+			res.status(200).json(response.toJSON());
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	/**
+	 * Lists all consents for the authenticated user.
+	 *
+	 * @param req - The Express request object containing the authenticated user information
+	 * @param res - The Express response object used to send the HTTP response
+	 * @param next - The Express next function for error handling middleware
+	 * @returns A promise that resolves to void. Sends a 200 status with consent data in JSON format
+	 * @throws Passes any caught errors to the next middleware for centralized error handling
+	 */
+
+	public listConsents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		try {
+			const userId = req.user!.userId;
+			const response = await this.listConsentUseCase.execute(userId);
+
 			res.status(200).json(response.toJSON());
 		} catch (error) {
 			next(error);

@@ -107,15 +107,75 @@ export class ConsentRepository implements IConsentRepository {
 		}
 	}
 
-	//TODO documentar
-	public async findByUserId(userId: string): Promise<ConsentEntity | null> {
-		this.logger.warn('findByUserId called but not implemented in F2', { userId });
-		throw new Error('Method not implemented in F2 - available in F3');
+	/**
+	 * Finds all active (non-revoked) consents for a given user.
+	 * @param userId - The ID of the user whose consents to retrieve
+	 * @returns A promise that resolves to an array of ConsentEntity objects ordered by grant date (newest first), or null if no consents are found
+	 * @throws Will throw a handled Prisma error if the database query fails
+	 */
+
+	public async findByUserId(userId: string): Promise<ConsentEntity[] | null> {
+		this.logger.debug('Finding consents by user ID', { userId });
+
+		try {
+			const consents = await this.client.userConsent.findMany({
+				where: { userId, revokedAt: null },
+				orderBy: { grantedAt: 'desc' },
+			});
+
+			this.logger.debug('Consents found', { userId, count: consents.length });
+
+			return consents.map((consent) =>
+				ConsentEntity.create({
+					id: consent.id,
+					userId: consent.userId,
+					clientId: consent.clientId,
+					scopes: consent.scopes,
+					grantedAt: consent.grantedAt,
+					expiresAt: consent.expiresAt,
+					revokedAt: consent.revokedAt,
+				})
+			);
+		} catch (error) {
+			this.logger.error('Error finding consents by user ID', {
+				userId,
+				error: getErrMessage(error),
+			});
+			throw handledPrismaError(error);
+		}
 	}
 
-	//TODO documentar
+	/**
+	 * Revokes a user consent by marking it as revoked.
+	 *
+	 * @param consentId - The unique identifier of the consent to revoke
+	 * @returns A promise that resolves when the consent has been successfully revoked
+	 * @throws {PrismaClientError} If a Prisma database error occurs during the revocation
+	 *
+	 * @example
+	 * ```typescript
+	 * await consentRepository.revokeConsent('consent-123');
+	 * ```
+	 */
+
 	public async revokeConsent(consentId: string): Promise<void> {
-		this.logger.warn('revokeConsent called but not implemented in F2', { consentId });
-		throw new Error('Method not implemented in F2 - available in F3');
+		this.logger.debug('Revoking consent', { consentId });
+
+		try {
+			await this.client.userConsent.update({
+				where: { id: consentId },
+				data: {
+					revokedAt: new Date(),
+				},
+			});
+
+			this.logger.info('Consent revoked successfully', { consentId });
+		} catch (error) {
+			this.logger.error('Error revoking consent', {
+				consentId,
+				error: getErrMessage(error),
+			});
+			throw handledPrismaError(error);
+		}
 	}
 }

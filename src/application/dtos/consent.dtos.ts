@@ -1,5 +1,45 @@
 import { ValidateRequestError } from '@shared';
 import { CodeRequestDTO, ConsentDecisionData, ConsentDecisionSchema, formattedZodError } from '@application';
+import { ConsentEntity } from '@domain';
+
+/**
+ * Represents consent data for an OAuth2 client authorization.
+ *
+ * @interface ConsentData
+ * @property {string} id - The unique identifier for the consent record.
+ * @property {string} clientId - The OAuth2 client identifier.
+ * @property {string} clientName - The human-readable name of the client application.
+ * @property {string[]} scopes - An array of OAuth2 scopes that have been granted.
+ * @property {Date} grantedAt - The timestamp when the consent was granted.
+ * @property {Date | null} expiresAt - The timestamp when the consent expires, or null if it never expires.
+ */
+
+interface ConsentData {
+	id: string;
+	clientId: string;
+	clientName: string;
+	scopes: string[];
+	grantedAt: Date;
+	expiresAt: Date | null;
+}
+
+/**
+ * Represents a consent object with serialized date fields.
+ *
+ * Extends {@link ConsentData} while converting date-related fields to strings
+ * for serialization purposes.
+ *
+ * @interface ConsentObject
+ * @extends {Omit<ConsentData, 'grantedAt' | 'expiresAt'>}
+ *
+ * @property {string} grantedAt - The timestamp when consent was granted, represented as an ISO 8601 string.
+ * @property {string | null} expiresAt - The timestamp when consent expires, represented as an ISO 8601 string, or null if consent does not expire.
+ */
+
+interface ConsentObject extends Omit<ConsentData, 'grantedAt' | 'expiresAt'> {
+	grantedAt: string;
+	expiresAt: string | null;
+}
 
 /**
  * Data Transfer Object for displaying OAuth2 scope information.
@@ -164,5 +204,66 @@ export class ConsentDecisionDTO {
 		}
 
 		return CodeRequestDTO.fromQuery(queryParams);
+	}
+}
+
+/**
+ * Data Transfer Object for listing user consents.
+ *
+ * Represents a response containing a collection of consent records with client information.
+ * Transforms consent entities into a serializable format with human-readable client names.
+ *
+ * @class ListConsentsResponseDTO
+ *
+ * @example
+ * const dto = ListConsentsResponseDTO.fromEntities(consents, clientNameMap);
+ * const json = dto.toJSON();
+ */
+export class ListConsentsResponseDTO {
+	public readonly consents!: ConsentData[];
+
+	private constructor(data: { consents: ConsentData[] }) {
+		Object.assign(this, data);
+	}
+
+	/**
+	 * Creates a ListConsentsResponseDTO from an array of ConsentEntity objects.
+	 * @param consents - Array of consent entities to transform
+	 * @param clientNames - Map of client IDs to their display names
+	 * @returns A new ListConsentsResponseDTO containing the transformed consent data
+	 */
+
+	public static fromEntities(consents: ConsentEntity[], clientNames: Map<string, string>): ListConsentsResponseDTO {
+		const data = consents.map((consent) => ({
+			id: consent.id,
+			clientId: consent.clientId,
+			clientName: clientNames.get(consent.clientId) || 'Unknown Application',
+			scopes: consent.scopes,
+			grantedAt: consent.grantedAt,
+			expiresAt: consent.expiresAt,
+		}));
+
+		return new ListConsentsResponseDTO({ consents: data });
+	}
+
+	/**
+	 * Converts the consent collection to a JSON-serializable object.
+	 *
+	 * @returns An object containing an array of consent objects with serialized dates.
+	 * Each consent object includes the id, clientId, clientName, scopes, grantedAt timestamp,
+	 * and an optional expiresAt timestamp. Dates are converted to ISO string format.
+	 */
+
+	public toJSON(): { consents: ConsentObject[] } {
+		return {
+			consents: this.consents.map((consent) => ({
+				id: consent.id,
+				clientId: consent.clientId,
+				clientName: consent.clientName,
+				scopes: consent.scopes,
+				grantedAt: consent.grantedAt.toISOString(),
+				expiresAt: consent.expiresAt ? consent.expiresAt.toISOString() : null,
+			})),
+		};
 	}
 }
