@@ -59,6 +59,27 @@ interface ClientObject extends Omit<Client, 'createdAt' | 'updatedAt'> {
 	updatedAt: string;
 }
 
+interface RotateSecretResponse {
+	clientId: string;
+	clientSecret: string;
+	oldSecretExpiresAt: string;
+	message: string;
+}
+
+/**
+ * Data transfer object for rotating a client secret.
+ * Extends the RotateSecretResponse interface, overriding the oldSecretExpiresAt property
+ * to use a Date object instead of its original type.
+ *
+ * @extends {Omit<RotateSecretResponse, 'oldSecretExpiresAt'>}
+ *
+ * @property {Date} oldSecretExpiresAt - The expiration date of the old secret before rotation
+ */
+
+export interface RotateSecretData extends Omit<RotateSecretResponse, 'oldSecretExpiresAt'> {
+	oldSecretExpiresAt: Date;
+}
+
 /**
  * Data Transfer Object for creating an OAuth 2.0 client.
  *
@@ -313,5 +334,50 @@ export class UpdateClientRequestDTO {
 		}
 
 		return new UpdateClientRequestDTO(resp.data);
+	}
+}
+
+/**
+ * Data Transfer Object for the secret rotation response.
+ * Contains the rotated client secret and expiration details for the old secret.
+ *
+ * @class RotateSecretResponseDTO
+ * @example
+ * const response = RotateSecretResponseDTO.create({
+ *   clientId: 'client-123',
+ *   clientSecret: 'new-secret',
+ *   oldSecretExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+ * });
+ *
+ * @property {string} clientId - The unique identifier of the client
+ * @property {string} clientSecret - The newly generated client secret
+ * @property {Date} oldSecretExpiresAt - The expiration date/time of the old secret
+ * @property {string} message - Success message for the rotation operation
+ */
+
+export class RotateSecretResponseDTO {
+	private readonly clientId!: string;
+	private readonly clientSecret!: string;
+	private readonly oldSecretExpiresAt!: Date;
+	private readonly message!: string;
+
+	private constructor(data: RotateSecretData) {
+		Object.assign(this, data);
+	}
+
+	public static create(clientId: string, newSecret: string, oldSecretExpiresAt: Date): RotateSecretResponseDTO {
+		return new RotateSecretResponseDTO({
+			clientId,
+			clientSecret: newSecret,
+			oldSecretExpiresAt,
+			message: 'Secret rotated successfully. Old secret will remain valid for 24 hours.',
+		});
+	}
+
+	public toJSON(): RotateSecretResponse {
+		return {
+			...this,
+			oldSecretExpiresAt: this.oldSecretExpiresAt.toISOString(),
+		};
 	}
 }

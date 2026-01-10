@@ -10,6 +10,7 @@ import { Router } from 'express';
  *   - GET /:id - Get a client by ID
  *   - PUT /:id - Update a client by ID
  *   - DELETE /:id - Delete a client by ID
+ *  - POST /:id/rotate-secret - Rotate the secret for a client by ID
  */
 
 export function createClientRoutes(controller: ClientController): Router {
@@ -19,5 +20,6 @@ export function createClientRoutes(controller: ClientController): Router {
 	router.get('/:id', controller.getById);
 	router.put('/:id', controller.update);
 	router.delete('/:id', controller.delete);
+	router.post('/:id/rotate-secret', controller.rotate);
 	return router;
 }

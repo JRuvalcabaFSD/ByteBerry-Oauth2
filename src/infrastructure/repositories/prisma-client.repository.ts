@@ -3,7 +3,8 @@ import { DBConfig } from '@config';
 import { PrismaClient } from '@prisma/client';
 import { clientMapper } from '@infrastructure';
 import type { IClientRepository, ILogger } from '@interfaces';
-import { handledPrismaError, Injectable, LogContextClass, LogContextMethod } from '@shared';
+import { getErrMessage, handledPrismaError, Injectable, LogContextClass, LogContextMethod } from '@shared';
+import { RotateSecretData } from '@application';
 
 /**
  * Repository for managing OAuth client entities using Prisma ORM.
@@ -244,6 +245,39 @@ export class ClientRepository implements IClientRepository {
 			return count > 0;
 		} catch (error) {
 			this.logger.error('Failed to check OAuth client existence', { clientId });
+			throw handledPrismaError(error);
+		}
+	}
+
+	/**
+	 * Rotates the client secret for an OAuth2 client.
+	 *
+	 * @param clientId - The unique identifier of the OAuth2 client
+	 * @param newSecretHash - The hashed value of the new client secret
+	 * @param oldSecretHash - The hashed value of the old client secret to be kept during grace period
+	 * @param gracePeriodExpiration - The date when the old secret will expire and no longer be valid
+	 * @throws {PrismaClientError} If the database update operation fails
+	 * @returns A promise that resolves when the secret rotation is complete
+	 */
+
+	@LogContextMethod()
+	public async rotateSecret(clientId: string, newSecretHash: string, oldSecretHash: string, gracePeriodExpiration: Date): Promise<void> {
+		this.logger.debug('Rotating client secret', { clientId, gracePeriodExpiresAt: gracePeriodExpiration.toISOString() });
+
+		try {
+			await this.client.oAuthClient.update({
+				where: { clientId },
+				data: {
+					clientSecret: newSecretHash,
+					clientSecretOld: oldSecretHash,
+					secretExpiresAt: gracePeriodExpiration,
+					updatedAt: new Date(),
+				},
+			});
+
+			this.logger.debug('Client secret rotated successfully', { clientId, gracePeriodExpiresAt: gracePeriodExpiration.toISOString() });
+		} catch (error) {
+			this.logger.error('Failed to rotate client secret', { clientId, error: getErrMessage(error) });
 			throw handledPrismaError(error);
 		}
 	}

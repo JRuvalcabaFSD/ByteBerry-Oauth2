@@ -77,6 +77,9 @@ model OAuthClient {
   isPublic     Boolean  @default(false) // PKCE required if true
   isActive     Boolean  @default(true) // For soft delete
 
+  clientSecretOld String?   @map("client_secret_old") // Previous secret (hashed)
+  secretExpiresAt DateTime? @map("secret_expires_at") // When old secret expires
+
   // ✅ NUEVO: Owner relationship
   userId String // Owner of this OAuth client
 

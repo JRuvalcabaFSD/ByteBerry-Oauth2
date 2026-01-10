@@ -15,6 +15,7 @@ declare module '@ServiceMap' {
 		GetClientByIdUseCase: IGetClientByIdUseCase;
 		UpdateClientUseCase: IUpdateClientUseCase;
 		DeleteClientUseCase: IDeleteClientUseCase;
+		RotateSecretUseCase: IRotateSecretUseCase;
 	}
 }
 
@@ -119,4 +120,18 @@ export interface IUpdateClientUseCase {
 
 export interface IDeleteClientUseCase {
 	execute(userId: string, clientId: string): Promise<void>;
+}
+
+/**
+ * Use case for rotating a client's secret.
+ *
+ * @interface IRotateSecretUseCase
+ * @method execute - Rotates the secret for a specified client owned by a user.
+ * @param {string} userId - The unique identifier of the user who owns the client.
+ * @param {string} clientId - The unique identifier of the client whose secret should be rotated.
+ * @returns {Promise<Dtos.RotateSecretResponseDTO>} A promise that resolves to the response containing the rotated secret details.
+ */
+
+export interface IRotateSecretUseCase {
+	execute(userId: string, clientId: string): Promise<Dtos.RotateSecretResponseDTO>;
 }

@@ -1,11 +1,5 @@
 import { CreateClientRequestDTO, UpdateClientRequestDTO } from '@application';
-import type {
-	ICreateClientUseCase,
-	IDeleteClientUseCase,
-	IGetClientByIdUseCase,
-	IListClientUseCase,
-	IUpdateClientUseCase,
-} from '@interfaces';
+import type * as UseCases from '@interfaces';
 import { Injectable } from '@shared';
 import { NextFunction, Request, Response } from 'express';
 
@@ -26,36 +20,50 @@ declare module '@ServiceMap' {
 /**
  * Controller for managing OAuth2 clients.
  *
- * Handles HTTP requests for client CRUD operations (Create, Read, Update, Delete).
- * All operations require authentication and are scoped to the authenticated user.
+ * Handles HTTP requests related to OAuth2 client operations including creation,
+ * retrieval, updating, deletion, and secret rotation. All operations are performed
+ * within the context of an authenticated user.
  *
- * @remarks
- * This controller uses dependency injection to receive use case implementations.
- * All methods follow a consistent error handling pattern by passing errors to the next middleware.
+ * @class ClientController
  *
  * @example
- * ```typescript
+ * // Usage in Express route setup
  * const controller = new ClientController(
  *   createUseCase,
  *   listUseCase,
  *   getUseCase,
  *   updateUseCase,
- *   deleteUseCase
+ *   deleteUseCase,
+ *   rotateUseCase
  * );
- * ```
+ *
+ * router.post('/clients', controller.create);
+ * router.get('/clients', controller.list);
+ * router.get('/clients/:id', controller.getById);
+ * router.patch('/clients/:id', controller.update);
+ * router.delete('/clients/:id', controller.delete);
+ * router.post('/clients/:id/rotate-secret', controller.rotate);
  */
 
 @Injectable({
 	name: 'ClientController',
-	depends: ['CreateClientUseCase', 'ListClientUseCase', 'GetClientByIdUseCase', 'UpdateClientUseCase', 'DeleteClientUseCase'],
+	depends: [
+		'CreateClientUseCase',
+		'ListClientUseCase',
+		'GetClientByIdUseCase',
+		'UpdateClientUseCase',
+		'DeleteClientUseCase',
+		'RotateSecretUseCase',
+	],
 })
 export class ClientController {
 	constructor(
-		private readonly createUseCase: ICreateClientUseCase,
-		private readonly listUseCase: IListClientUseCase,
-		private readonly getUseCase: IGetClientByIdUseCase,
-		private readonly updateUseCase: IUpdateClientUseCase,
-		private readonly deleteUseCase: IDeleteClientUseCase
+		private readonly createUseCase: UseCases.ICreateClientUseCase,
+		private readonly listUseCase: UseCases.IListClientUseCase,
+		private readonly getUseCase: UseCases.IGetClientByIdUseCase,
+		private readonly updateUseCase: UseCases.IUpdateClientUseCase,
+		private readonly deleteUseCase: UseCases.IDeleteClientUseCase,
+		private readonly rotateUseCase: UseCases.IRotateSecretUseCase
 	) {}
 
 	/**
@@ -182,6 +190,28 @@ export class ClientController {
 			await this.deleteUseCase.execute(userId, clientId);
 
 			res.status(204).send();
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	/**
+	 * Rotates the client credentials for the authenticated user.
+	 * @param req - The Express request object containing the authenticated user information
+	 * @param res - The Express response object used to send the rotated client data
+	 * @param next - The Express next middleware function for error handling
+	 * @returns A promise that resolves when the response is sent
+	 * @throws Passes errors to the next middleware via the error handler
+	 */
+
+	public rotate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		try {
+			const userId = req.user!.userId;
+			const clientId = req.params.id;
+
+			const response = this.rotateUseCase.execute(userId, clientId);
+
+			res.status(200).json((await response).toJSON());
 		} catch (error) {
 			next(error);
 		}
