@@ -25,6 +25,7 @@
 		"clean": "rm -rf dist",
 		"db:down": "docker-compose down -v",
 		"db:reset": "pnpm db migrate reset --force",
+		"db:reset:seed": "pnpm db migrate reset --force && pnpm db:seed",
 		"db:seed": "pnpm db db seed",
 		"db:setup": "docker-compose up -d && pnpm db generate && pnpm db migrate dev && pnpm db:seed",
 		"db:studio": "pnpm db studio",

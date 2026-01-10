@@ -13,6 +13,7 @@ declare module '@ServiceMap' {
 		GetJwksUseCase: IGetJwksUseCase;
 		CheckConsentUseCase: ICheckConsentUseCase;
 		ShowConsentUseCase: IShowConsentUseCase;
+		ProcessConsentUseCase: IProcessConsentUseCase;
 	}
 }
 
@@ -144,4 +145,21 @@ export interface ICheckConsentUseCase {
 
 export interface IShowConsentUseCase {
 	execute(request: Dtos.CodeRequestDTO): Promise<Dtos.ConsentScreenData>;
+}
+
+/**
+ * Use case interface for processing user consent decisions in OAuth2 flow.
+ *
+ * @interface IProcessConsentUseCase
+ *
+ * @method execute - Processes a user's consent decision and generates an authorization code.
+ * @param userId - The unique identifier of the user making the consent decision.
+ * @param decision - The consent decision details (approve/deny) provided by the user.
+ * @returns A promise that resolves to a code response containing the authorization code or error details.
+ *
+ * @throws {Error} May reject if the consent processing fails or user validation fails.
+ */
+
+export interface IProcessConsentUseCase {
+	execute(userId: string, decision: Dtos.ConsentDecisionDTO): Promise<void>;
 }

@@ -1,8 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { ConsentRequiredError, Injectable, InvalidCodeError } from '@shared';
-import { CodeRequestDTO, TokenRequestDTO } from '@application';
-import type { IConfig, IExchangeTokenUseCase, IGenerateAuthCodeUseCase, IGetJwksUseCase, IShowConsentUseCase } from '@interfaces';
+import { CodeRequestDTO, ConsentDecisionDTO, TokenRequestDTO } from '@application';
+import type {
+	IConfig,
+	IExchangeTokenUseCase,
+	IGenerateAuthCodeUseCase,
+	IGetJwksUseCase,
+	IProcessConsentUseCase,
+	IShowConsentUseCase,
+} from '@interfaces';
 
 //TODO documentar
 declare module '@ServiceMap' {
@@ -29,12 +36,13 @@ declare module '@ServiceMap' {
  * ```
  */
 
-@Injectable({ name: 'authController', depends: ['GenerateCodeUseCase', 'ShowConsentUseCase', 'Config'] })
+@Injectable({ name: 'authController', depends: ['GenerateCodeUseCase', 'ShowConsentUseCase', 'ProcessConsentUseCase', 'Config'] })
 export class AuthController {
 	private readonly version: string;
 	constructor(
-		private readonly authUseCase: IGenerateAuthCodeUseCase,
-		private readonly consentUseCase: IShowConsentUseCase,
+		private readonly codeUseCase: IGenerateAuthCodeUseCase,
+		private readonly showConsentUseCase: IShowConsentUseCase,
+		private readonly processConsentUseCase: IProcessConsentUseCase,
 		config: IConfig
 	) {
 		this.version = config.version;
@@ -43,11 +51,9 @@ export class AuthController {
 	public authorize = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		const request = CodeRequestDTO.fromQuery(req.query as Record<string, string>);
 		try {
-			const userId = req.user?.userId;
+			const userId = req.user!.userId;
 
-			if (!userId) throw new InvalidCodeError('Authentication required');
-
-			const response = this.authUseCase.execute(userId, request);
+			const response = this.codeUseCase.execute(userId, request);
 			const redirectUri = (await response).buildRedirectURrl(request.redirectUri);
 
 			res.redirect(redirectUri);
@@ -68,12 +74,12 @@ export class AuthController {
 
 	public showConsentScreen = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		try {
-			const userId = req.user?.userId;
+			const userId = req.user!.userId;
 
 			if (!userId) throw new InvalidCodeError('Authentication required');
 
 			const request = CodeRequestDTO.fromQuery(req.query as Record<string, string>);
-			const response = await this.consentUseCase.execute(request);
+			const response = await this.showConsentUseCase.execute(request);
 
 			return res.render('consent', {
 				...response,
@@ -81,6 +87,22 @@ export class AuthController {
 				version: this.version,
 				nonce: res.locals.nonce,
 			});
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	public processConsent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+		try {
+			const userId = req.user!.userId;
+			const decision = ConsentDecisionDTO.fromBody(req.body);
+
+			await this.processConsentUseCase.execute(userId, decision);
+			const request = decision.toCodeRequest();
+			const response = await this.codeUseCase.execute(userId, request);
+
+			const redirectUrl = response.buildRedirectURrl(decision.redirectUri);
+			res.redirect(redirectUrl);
 		} catch (error) {
 			next(error);
 		}

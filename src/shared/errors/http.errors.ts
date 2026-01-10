@@ -269,6 +269,30 @@ export class ConsentRequiredError extends HttpError {
 }
 
 /**
+ * Error thrown when a user denies consent during the OAuth authorization flow.
+ *
+ * @class DenyConsentError
+ * @extends HttpError
+ *
+ * @example
+ * ```typescript
+ * throw new DenyConsentError();
+ * ```
+ *
+ * @remarks
+ * This error represents an HTTP 401 Unauthorized response and is categorized
+ * under the 'oauth' error domain with the code 'access denied'.
+ */
+
+export class DenyConsentError extends HttpError {
+	constructor() {
+		super('User denied authorization', 'oauth', 'access denied', 401);
+		this.name = 'DenyConsentError';
+
+		Error.captureStackTrace(this, DenyConsentError);
+	}
+}
+/**
  * Represents an HTTP 401 Unauthorized error thrown when user credentials are invalid.
  *
  * Typically used during authentication processes to indicate that the provided credentials

@@ -2,7 +2,7 @@
 export * from './http/http.server.js';
 
 //Http - Middlewares
-export * from './http/middlewares/core.middleware.js';
+export * from './http/middlewares/cors.middleware.js';
 export * from './http/middlewares/error.middleware.js';
 export * from './http/middlewares/logger.middleware.js';
 export * from './http/middlewares/requestId.middleware.js';

@@ -58,10 +58,15 @@ export class CodeRepository implements ICodeRepository {
 					expiresAt: code.expiresAt,
 				},
 				create: {
-					...code,
-					clientId: code.clientId.getValue(),
+					code: code.code,
+					userId: code.userId,
+					clientId: code.clientId.getValue(), // Usando el Value Object
+					redirectUri: code.redirectUri,
 					codeChallenge: code.codeChallenge.getChallenge(),
 					codeChallengeMethod: code.codeChallenge.getMethod(),
+					scope: code.scope,
+					state: code.state,
+					expiresAt: code.expiresAt,
 					used: code.isUsed(),
 					usedAt: code.isUsed() ? now : null,
 					createdAt: now,

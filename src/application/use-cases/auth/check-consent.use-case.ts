@@ -49,7 +49,7 @@ export class CheckConsentUseCase implements ICheckConsentUseCase {
 			return false;
 		}
 
-		if (consent.isActive()) {
+		if (!consent.isActive()) {
 			this.logger.debug('Consent found but not active', {
 				userId,
 				clientId,

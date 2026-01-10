@@ -1,4 +1,5 @@
 import * as Schemas from '@application';
+import { ConsentDecisionData } from '@application';
 import { UserEntity, SessionEntity } from '@domain';
 import { ValidateRequestError } from '@shared';
 
@@ -525,5 +526,103 @@ export class ScopeDisplayDTO {
 			name: this.name,
 			description: this.description,
 		};
+	}
+}
+
+/**
+ * Data Transfer Object for consent decision requests in OAuth2 flow.
+ *
+ * Represents a user's approval or denial of a client application's request
+ * to access protected resources on their behalf.
+ *
+ * @class ConsentDecisionDTO
+ *
+ * @property {('approve' | 'deny')} decision - The user's consent decision
+ * @property {string} clientId - The OAuth2 client identifier
+ * @property {string} redirectUri - The URI where the authorization code will be sent
+ * @property {string} responseType - The OAuth2 response type (e.g., 'code')
+ * @property {string} codeChallenge - The PKCE code challenge
+ * @property {('S256' | 'plain')} codeChallengeMethod - The PKCE code challenge method
+ * @property {string} [state] - Optional state parameter for CSRF protection
+ * @property {string} [scope] - Optional space-separated list of requested scopes
+ *
+ * @example
+ * const dto = ConsentDecisionDTO.fromBody({
+ *   decision: 'approve',
+ *   client_id: 'my-app',
+ *   redirect_uri: 'https://app.example.com/callback',
+ *   response_type: 'code',
+ *   code_challenge: 'E9Mrozoa2owUKYpOm9O0zFYwXoXQhf_vHg6eHVAITJU',
+ *   code_challenge_method: 'S256',
+ *   state: 'xyz123'
+ * });
+ *
+ * @throws {ValidateRequestError} When decision value is neither 'approve' nor 'deny'
+ */
+
+export class ConsentDecisionDTO {
+	public readonly decision!: 'approve' | 'deny';
+	public readonly clientId!: string;
+	public readonly redirectUri!: string;
+	public readonly responseType!: string;
+	public readonly codeChallenge!: string;
+	public readonly codeChallengeMethod!: 'S256' | 'plain';
+	public readonly state?: string;
+	public readonly scope?: string;
+
+	private constructor(data: ConsentDecisionData) {
+		Object.assign(this, data);
+	}
+
+	/**
+	 * Creates a ConsentDecisionDTO instance from a request body object.
+	 *
+	 * @param body - The request body containing consent decision data
+	 * @returns A new ConsentDecisionDTO instance with validated data
+	 * @throws {ValidateRequestError} If the body fails schema validation or contains an invalid decision value
+	 * @remarks The decision field must be either 'approve' or 'deny'
+	 */
+
+	public static fromBody(body: Record<string, string>): ConsentDecisionDTO {
+		const resp = Schemas.ConsentDecisionSchema.safeParse({ ...body });
+		if (!resp.success) {
+			const formatted = Schemas.formattedZodError(resp.error, 'form');
+			throw new ValidateRequestError(formatted.msg, formatted.errors);
+		}
+
+		if (resp.data.decision !== 'approve' && resp.data.decision !== 'deny') {
+			throw new ValidateRequestError('Invalid decision value');
+		}
+
+		return new ConsentDecisionDTO(resp.data);
+	}
+
+	/**
+	 * Converts the current authorization request to a CodeRequestDTO.
+	 *
+	 * Constructs a query parameters object containing required OAuth 2.0 PKCE parameters
+	 * (client_id, redirect_uri, response_type, code_challenge, code_challenge_method)
+	 * and optionally includes state and scope if they are defined.
+	 *
+	 * @returns {CodeRequestDTO} A CodeRequestDTO instance created from the constructed query parameters.
+	 */
+	public toCodeRequest(): CodeRequestDTO {
+		const queryParams: Record<string, string> = {
+			client_id: this.clientId,
+			redirect_uri: this.redirectUri,
+			response_type: this.responseType,
+			code_challenge: this.codeChallenge,
+			code_challenge_method: this.codeChallengeMethod,
+		};
+
+		if (this.state) {
+			queryParams.state = this.state;
+		}
+
+		if (this.scope) {
+			queryParams.scope = this.scope;
+		}
+
+		return CodeRequestDTO.fromQuery(queryParams);
 	}
 }
